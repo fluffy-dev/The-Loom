@@ -4,6 +4,8 @@ from typing import List
 from backend.user.dependencies.service import IUserService
 from backend.user.dto import UserDTO, PublicUserDTO, PrivateUserDTO
 from backend.libs.exceptions import AlreadyExists, NotFound, PaginationError
+from backend.security.dependencies import ICurrentUser
+
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -30,3 +32,14 @@ async def get_all_users(service: IUserService, limit: int = 100, offset: int = 0
         return await service.get_users_list(limit, offset)
     except PaginationError as e:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
+
+@router.get("/me", response_model=PrivateUserDTO, summary="Get current user profile")
+async def read_users_me(current_user: ICurrentUser):
+    """
+    Retrieves the private profile of the currently authenticated user.
+    """
+    return PrivateUserDTO(
+        name=current_user.name,
+        login=current_user.login,
+        email=current_user.email
+    )
