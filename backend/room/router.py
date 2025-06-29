@@ -1,22 +1,12 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, status, HTTPException, UploadFile, File
+from fastapi import APIRouter, status, HTTPException, UploadFile, File
 
-from backend.room.service import RoomService
+from backend.room.dependencies.service import IRoomService
 from backend.room.dto import RoomDTO
 from backend.file.dto import FileMetadataDTO
-from backend.room.repositories.room import RoomRepository
-from backend.config.database.session import ISession
 from backend.security.dependencies import ICurrentUser
 from backend.room.exceptions import RoomLimitExceeded, RoomNotFound, FileLimitExceeded, FileSizeExceeded
 
 router = APIRouter(prefix="/rooms", tags=["Rooms"])
-
-def get_room_service(session: ISession) -> RoomService:
-    """Dependency to provide the RoomService."""
-    room_repo = RoomRepository(session)
-    return RoomService(room_repo)
-
-IRoomService = Annotated[RoomService, Depends(get_room_service)]
 
 @router.post("/", response_model=RoomDTO, status_code=status.HTTP_201_CREATED)
 async def create_room(current_user: ICurrentUser, service: IRoomService):

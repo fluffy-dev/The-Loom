@@ -3,15 +3,9 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPExce
 from backend.collaboration.manager import manager
 from backend.collaboration.service import CollaborationService
 from backend.security.service import TokenService
-from backend.user.repositories.user import UserRepository
-from backend.config.database.session import ISession
+from backend.user.dependencies.repository import IUserRepository
 
 router = APIRouter(tags=["Collaboration"])
-
-
-def get_user_repo(session: ISession) -> UserRepository:
-    """Dependency to provide UserRepository."""
-    return UserRepository(session)
 
 
 @router.websocket("/ws/{room_id}/{file_id}")
@@ -20,7 +14,7 @@ async def websocket_endpoint(
         room_id: str,
         file_id: str,
         token: str,
-        user_repo: UserRepository = Depends(get_user_repo)
+        user_repo: IUserRepository
 ):
     """
     Handles WebSocket connections for real-time collaboration on a specific file.

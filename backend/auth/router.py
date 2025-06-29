@@ -2,20 +2,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from backend.auth.service import AuthService
-from backend.user.dependencies.repository import IUserRepository
+from backend.auth.dependencies.service import IAuthService
 from backend.user.exceptions import UserNotFound
 from backend.security.dto import TokenDTO
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
-
-def get_auth_service(user_repo: IUserRepository) -> AuthService:
-    """
-    Dependency to provide the AuthService.
-    """
-    return AuthService(user_repo)
-
-IAuthService = Annotated[AuthService, Depends(get_auth_service)]
 
 @router.post("/token", response_model=TokenDTO)
 async def login_for_access_token(

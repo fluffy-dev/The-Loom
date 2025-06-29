@@ -25,16 +25,13 @@ class AuthService:
         Raises:
             UserNotFound: If the user does not exist or password is incorrect.
         """
-        # Find user by login (which is 'username' in the form)
         user = await self.user_repo.find({"login": form_data.username})
         if not user:
             raise UserNotFound
 
-        # Verify password
         if not PasswordService.verify_password(form_data.password, user.password):
-            raise UserNotFound # Raise same exception to prevent user enumeration
+            raise UserNotFound
 
-        # Create tokens
         access_token = TokenService.create_access_token(data={"sub": str(user.id)})
         refresh_token = TokenService.create_refresh_token(data={"sub": str(user.id)})
 

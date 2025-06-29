@@ -4,13 +4,13 @@ import aiofiles
 from pathlib import Path
 from fastapi import UploadFile
 
-from backend.room.repositories.room import RoomRepository
+from backend.room.dependencies.repository import IRoomRepository
 from backend.room.dto import RoomDTO
 from backend.file.dto import FileMetadataDTO
 from backend.user.dto import UserDTO
 from backend.room.exceptions import RoomLimitExceeded, RoomNotFound, FileLimitExceeded, FileSizeExceeded
 from backend.file.models.file_metadata import FileMetadataModel
-from backend.snapshot.repositories.snapshot import SnapshotRepository
+from backend.snapshot.dependencies.repository import ISnapshotRepository
 from backend.snapshot.dto import SnapshotDTO
 
 # Константы для ограничений
@@ -24,7 +24,7 @@ class RoomService:
     """
     Service layer for room and file business logic.
     """
-    def __init__(self, room_repo: RoomRepository, snapshot_repo: SnapshotRepository):
+    def __init__(self, room_repo: IRoomRepository, snapshot_repo: ISnapshotRepository):
         self.room_repo = room_repo
         self.snapshot_repo = snapshot_repo
 
