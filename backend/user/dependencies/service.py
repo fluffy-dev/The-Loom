@@ -1,5 +1,5 @@
 from fastapi import Depends
 from typing import Annotated
-from src.user.service import UserService
+from backend.user.service import UserService
 
 IUserService = Annotated[UserService, Depends()]
