@@ -23,4 +23,5 @@ class RoomModel(Base):
     owner: Mapped["UserModel"] = relationship(back_populates="owned_rooms")
     participants: Mapped[List["RoomParticipantModel"]] = relationship(back_populates="room", cascade="all, delete-orphan")
     files: Mapped[List["FileMetadataModel"]] = relationship(back_populates="room", cascade="all, delete-orphan")
+    snapshots: Mapped[List["SnapshotModel"]] = relationship(back_populates="room", cascade="all, delete-orphan")
 
