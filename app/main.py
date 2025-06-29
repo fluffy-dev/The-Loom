@@ -15,11 +15,6 @@ async def lifespan(app: FastAPI):
     `DB_RUN_AUTO_MIGRATE` setting.
     On shutdown, it disposes of the database engine connections.
     """
-    if settings.db_run_auto_migrate:
-        async with db_helper.engine.begin() as conn:
-            # This will create tables for any models that inherit from Base
-            # and are imported somewhere in the project.
-            await conn.run_sync(Base.metadata.create_all)
     yield
     await db_helper.engine.dispose()
 

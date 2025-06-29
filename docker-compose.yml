@@ -21,14 +21,19 @@ services:
     container_name: loom_app
     env_file:
       - .env
+    environment:
+      - DB_URL=${DB_URL_SCHEME}://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - ./app:/app/app
+      - ./alembic:/app/alembic
     ports:
       - "${APP_PORT:-8000}:8000"
-    command: uvicorn app.main:app --host ${APP_HOST} --port ${APP_PORT} --reload
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host ${APP_HOST} --port ${APP_PORT} --reload"
 
 volumes:
   postgres_data:
