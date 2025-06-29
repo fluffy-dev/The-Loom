@@ -2,9 +2,8 @@ from typing import List
 
 from backend.libs.exceptions import PaginationError
 from backend.user.dependencies.repository import IUserRepository
-from backend.user.dto import UserDTO, UpdateUserDTO, FindUserDTO, PublicUserDTO, PrivateUserDTO
-# We will need PasswordService later for real user creation
-# from src.security.service import PasswordService
+from backend.user.dto import UserDTO, PublicUserDTO, PrivateUserDTO
+from backend.security.service import PasswordService
 
 class UserService:
     def __init__(self, user_repository: IUserRepository):
@@ -12,13 +11,10 @@ class UserService:
 
     async def create_user_with_hashed_password(self, dto: UserDTO) -> PrivateUserDTO:
         """
-        Creates a new user, hashing the password before saving.
-        This is a placeholder for a more complete security implementation.
+        Creates a new user, correctly hashing the password before saving.
         """
-        # In a real scenario, you'd use a robust password hashing service.
-        # For now, we'll just append a suffix for demonstration.
-        # dto.password = PasswordService.get_password_hash(dto.password)
-        dto.password = dto.password + "_hashed"
+        hashed_password = PasswordService.get_password_hash(dto.password)
+        dto.password = hashed_password
 
         created_user = await self.repository.create(dto)
         return PrivateUserDTO(
