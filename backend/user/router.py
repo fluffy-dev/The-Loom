@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, HTTPException
 from typing import List
 
+from backend.room.dto import RoomDTO
 from backend.user.dependencies.service import IUserService
 from backend.user.dto import UserDTO, PublicUserDTO, PrivateUserDTO
 from backend.libs.exceptions import AlreadyExists, NotFound, PaginationError
@@ -43,3 +44,10 @@ async def read_users_me(current_user: ICurrentUser):
         login=current_user.login,
         email=current_user.email
     )
+
+@router.get("/me/rooms", response_model=List[RoomDTO])
+async def get_my_rooms(current_user: ICurrentUser, service: IUserService):
+    """
+    Retrieves a list of all rooms the current user has participated in.
+    """
+    return await service.get_user_rooms(current_user.id)

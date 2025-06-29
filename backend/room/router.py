@@ -5,6 +5,7 @@ from backend.room.dto import RoomDTO
 from backend.file.dto import FileMetadataDTO
 from backend.security.dependencies import ICurrentUser
 from backend.room.exceptions import RoomLimitExceeded, RoomNotFound, FileLimitExceeded, FileSizeExceeded
+from backend.snapshot.dto import SnapshotDTO
 
 router = APIRouter(prefix="/rooms", tags=["Rooms"])
 
@@ -34,3 +35,23 @@ async def upload_file(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except (FileLimitExceeded, FileSizeExceeded) as e:
         raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail=str(e))
+
+@router.get("/{room_id}", response_model=RoomDTO)
+async def get_room_details(room_id: str, service: IRoomService):
+    """
+    Retrieves detailed information about a room, including its files and snapshots.
+    """
+    try:
+        return await service.get_room_details(room_id)
+    except RoomNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+@router.post("/{room_id}/snapshots", response_model=SnapshotDTO, status_code=status.HTTP_201_CREATED)
+async def create_snapshot(room_id: str, service: IRoomService):
+    """
+    Creates a point-in-time snapshot of all files in the room.
+    """
+    try:
+        return await service.create_snapshot(room_id)
+    except RoomNotFound as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
