@@ -79,9 +79,8 @@ class RoomService:
         if not room:
             raise RoomNotFound("The specified room does not exist.")
 
-        # В будущем здесь можно добавить проверку прав доступа
-        # if room.owner_id != current_user.id:
-        #     raise PermissionError("User does not have permission to upload to this room.")
+        if room.owner_id != current_user.id:
+            raise PermissionError("You do not have permission to modify this room.")
 
         if len(room.files) >= MAX_FILES_PER_ROOM:
             raise FileLimitExceeded(f"Room has reached the limit of {MAX_FILES_PER_ROOM} files.")

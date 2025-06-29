@@ -41,7 +41,7 @@ async def websocket_endpoint(
 
     try:
         user_id = int(payload.sub)
-        user = await user_repo.get(user_id)  # Проверяем, что пользователь существует
+        await user_repo.get(user_id)  # Проверяем, что пользователь существует
     except (ValueError, Exception):
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
