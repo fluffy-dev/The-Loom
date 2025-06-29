@@ -1,9 +1,8 @@
-# src/user/service.py
 from typing import List
 
-from src.libs.exceptions import PaginationError
-from src.user.dependencies.repository import IUserRepository
-from src.user.dto import UserDTO, UpdateUserDTO, FindUserDTO, PublicUserDTO, PrivateUserDTO
+from backend.libs.exceptions import PaginationError
+from backend.user.dependencies.repository import IUserRepository
+from backend.user.dto import UserDTO, UpdateUserDTO, FindUserDTO, PublicUserDTO, PrivateUserDTO
 # We will need PasswordService later for real user creation
 # from src.security.service import PasswordService
 
