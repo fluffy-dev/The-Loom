@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from backend.routes import router as api_router
+from backend.routes import router as api_router, websocket_router
+
 
 def get_app() -> FastAPI:
     """
@@ -10,6 +11,7 @@ def get_app() -> FastAPI:
         version="1.0.0",
     )
     app.include_router(api_router)
+    app.include_router(websocket_router)
 
     @app.get("/health", tags=["Health Check"])
     def health():
