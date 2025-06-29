@@ -1,9 +1,12 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException, status
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
 
 from backend.collaboration.manager import manager
 from backend.collaboration.service import CollaborationService
 from backend.security.service import TokenService
 from backend.user.dependencies.repository import IUserRepository
+from backend.redis_client.client import get_redis_client
 
 router = APIRouter(tags=["Collaboration"])
 
@@ -57,13 +60,17 @@ async def websocket_endpoint(
         sync_message = b'\x00\x00' + initial_state
         await websocket.send_bytes(sync_message)
 
+    redis_client = get_redis_client()
+    activity_key = f"activity:{room_id}"
+
     try:
-        # 4. Цикл приема и ретрансляции сообщений
         while True:
             data = await websocket.receive_bytes()
-            # Сохраняем последнее состояние для новых подключений
+
+            # Обновляем метку активности при каждом сообщении
+            await redis_client.set(activity_key, datetime.now(timezone.utc).isoformat())
+
             await collab_service.save_document_state(room_id, file_id, data)
-            # Ретранслируем всем остальным
             await manager.broadcast(data, connection_room_id, websocket)
     except WebSocketDisconnect:
         manager.disconnect(websocket, connection_room_id)
