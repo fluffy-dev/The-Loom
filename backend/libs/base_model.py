@@ -9,13 +9,7 @@ class Base(DeclarativeBase):
 
     This abstract base class provides each inheriting model with an integer
     primary key (`id`), a creation timestamp (`created_at`), and an
-    update timestamp (`updated_at`). The timestamps are managed automatically
-    by the database.
-
-    Attributes:
-        id (Mapped[int]): The primary key for the table, auto-incrementing.
-        created_at (Mapped[datetime]): Timestamp of when the record was created.
-        updated_at (Mapped[datetime]): Timestamp of the last update to the record.
+    update timestamp (`updated_at`).
     """
     __abstract__ = True
 
