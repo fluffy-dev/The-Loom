@@ -1,8 +1,11 @@
+from typing import List
+
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from backend.config.database.session import ISession
 from backend.room.models.room import RoomModel
+from backend.room.models.room_participant import RoomParticipantModel
 
 
 class RoomRepository:
@@ -45,16 +48,28 @@ class RoomRepository:
 
     async def get_by_human_id(self, human_readable_id: str) -> RoomModel | None:
         """
-        Retrieves a room by its human-readable ID, preloading files.
-
-        Args:
-            human_readable_id (str): The user-friendly ID of the room.
-
-        Returns:
-            RoomModel | None: The found room model or None.
+        Retrieves a room by its human-readable ID, preloading files and snapshots.
         """
-        stmt = select(RoomModel).where(RoomModel.human_readable_id == human_readable_id).options(
-            selectinload(RoomModel.files)
+        stmt = (
+            select(RoomModel)
+            .where(RoomModel.human_readable_id == human_readable_id)
+            .options(
+                selectinload(RoomModel.files),
+                selectinload(RoomModel.snapshots)
+            )
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
+
+    async def get_rooms_for_user(self, user_id: int) -> List[RoomModel]:
+        """
+        Retrieves all rooms a user has participated in.
+        """
+        stmt = (
+            select(RoomModel)
+            .join(RoomParticipantModel)
+            .where(RoomParticipantModel.user_id == user_id)
+            .order_by(RoomModel.created_at.desc())
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
