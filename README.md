@@ -62,7 +62,7 @@ Follow these instructions to set up and run the project locally for development.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/The-Loom.git
+git clone https://github.com/fluffy-dev/The-Loom.git
 cd The-Loom
 ```
 
