@@ -16,6 +16,7 @@ The project is architected to be scalable and maintainable, featuring a clean se
 *   **Project Snapshots**: Create a point-in-time backup of all files in a room, which are downloadable as a single `.zip` archive.
 *   **User Authentication**: Secure JWT-based authentication system for user registration and login, ensuring that only authorized users can create and manage rooms.
 *   **Automated Cleanup**: A background task runs periodically to clean up old and inactive rooms, freeing up server resources and keeping the environment tidy.
+*   **Containerized Deployment**: Full Docker and Docker Compose support for easy, reproducible, and isolated deployment.
 *   **Structured Logging & Error Handling**: Centralized logging and exception handling provide clear insights into the application's behavior and make debugging easier.
 
 ## Tech Stack
@@ -29,6 +30,7 @@ The Loom is built with a modern, asynchronous Python stack:
 *   **Database Migrations**: **Alembic** for managing database schema changes.
 *   **In-Memory Data Store**: **Redis** is used to manage and persist CRDT document states and track room activity.
 *   **Collaboration Protocol**: **y-py** for handling CRDTs, ensuring that concurrent edits are merged correctly and efficiently.
+*   **Containerization**: **Docker** & **Docker Compose** for development and production environments.
 *   **Web Server**: **Uvicorn**, an ASGI server for running the FastAPI application.
 *   **Authentication**: **python-jose** and **passlib** for JWT generation/validation and password hashing.
 *   **Environment Configuration**: **pydantic-settings** for managing application settings through environment variables.
@@ -48,7 +50,7 @@ The application follows a layered architecture to ensure a clean separation of c
     *   **WebSocket Endpoint**: The main entry point for real-time communication. It authenticates users, connects them to the manager, and relays CRDT updates to the `CollaborationService`.
     *   **`CollaborationService`**: Interacts with Redis to save and retrieve the binary state of shared documents (YDocs).
 
-## Getting Started
+## Getting Started (Manual Setup)
 
 Follow these instructions to set up and run the project locally for development.
 
@@ -83,6 +85,10 @@ Create a `.env` file in the project root directory. You can copy the example bel
 ```env
 # .env
 
+# App Configuration
+APP_HOST=0.0.0.0
+APP_PORT=8000
+
 # PostgreSQL Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
@@ -107,7 +113,7 @@ ROOM_LIFETIME_DAYS=7
 ROOM_INACTIVITY_HOURS=3
 ```
 
-**Important**: Make sure your PostgreSQL server is running and you have created a database with the name specified in `DB_NAME`.
+**Important**: Make sure your PostgreSQL and Redis servers are running. You must create a PostgreSQL database with the name specified in `DB_NAME`.
 
 ### 4. Run Database Migrations
 
@@ -126,6 +132,61 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 The API will be available at `http://localhost:8000`, with interactive documentation at `http://localhost:8000/docs`.
+
+---
+
+## Running with Docker
+
+For a more streamlined and isolated setup, you can use Docker and Docker Compose to run the entire application stack.
+
+### Prerequisites
+
+*   Docker
+*   Docker Compose
+
+### 1. Configure Environment
+
+Create the `.env` file in the project root as described in the manual setup section. Docker Compose will automatically use this file to configure the services.
+
+**Crucially**, ensure the `DB_HOST` in your `.env` file is set to the name of the database service in `docker-compose.yml`, which is `db`.
+
+```env
+# .env (for Docker)
+DB_HOST=db # Use the service name, not localhost
+# ... other variables remain the same
+```
+
+### 2. Build and Run the Application
+
+From the project's root directory, run the following command:
+
+```bash
+docker-compose up --build```
+
+This command will:
+1.  Pull the required `postgres` and `redis` images.
+2.  Build a Docker image for the FastAPI application based on the `Dockerfile`.
+3.  Start containers for the application, the database, and Redis.
+4.  Create a persistent volume for PostgreSQL data.
+5.  Wait for the database to be healthy before starting the application.
+6.  Automatically run the `alembic upgrade head` command inside the app container.
+7.  Start the Uvicorn server with `--reload` enabled.
+
+The API will be available at `http://localhost:8000`. Because the application code is mounted as a volume, any changes you make to the source files on your host machine will trigger an automatic reload of the server inside the container.
+
+### 3. Stopping the Application
+
+To stop and remove the containers, press `Ctrl+C` in the terminal where `docker-compose` is running, and then run:
+
+```bash
+docker-compose down
+```
+
+If you also want to remove the database volume (deleting all data), use:
+
+```bash
+docker-compose down -v
+```
 
 ## API Endpoints
 
@@ -179,6 +240,10 @@ The project is organized into modules, with each module responsible for a specif
 │   └── routes.py     # Main API router aggregation
 ├── migrations/       # Alembic database migration scripts
 ├── storage/          # Default location for uploaded files and snapshots
+├── .env              # Environment variables (not committed)
+├── alembic.ini       # Alembic configuration
+├── docker-compose.yml # Docker Compose configuration
+├── Dockerfile        # Docker build instructions for the app
 ├── main.py           # Application entry point
 ├── requirements.txt  # Project dependencies
 └── README.md         # This file
