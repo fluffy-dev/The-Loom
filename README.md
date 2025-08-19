@@ -59,7 +59,6 @@ Follow these instructions to set up and run the project locally for development.
 *   Python 3.10+
 *   PostgreSQL
 *   Redis
-*   An environment variable management tool (e.g., `python-dotenv`)
 
 ### 1. Clone the Repository
 
